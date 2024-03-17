@@ -15,10 +15,8 @@ describe('example Products test suite', () => {
     })
 
     it('checks the response body for some properties', () => {
-        // Execute a get request and assert that the content-type in the header is correct.
         cy.request('GET', '/products').then((response) => {
             expect(response.status).to.equal(200)
-            // This assertion is for the response time
             expect(response.duration).to.not.be.greaterThan(500)
             Cypress._.each(response.body.products, (products) => {
                 // These make sure the properties are not null
@@ -82,7 +80,6 @@ describe('example Products test suite', () => {
     })
 
     it('add a new product', () => {
-        // Execute a get request and assert that the content-type in the header is correct.
         cy.request('POST', '/products/add', { title: 'BMW Pencil' }).then(
             (response) => {
                 expect(response.status).to.equal(200)
@@ -95,8 +92,7 @@ describe('example Products test suite', () => {
         )
     })
 
-    it('add a new product', () => {
-        // Execute a get request and assert that the content-type in the header is correct.
+    it('update existing product', () => {
         cy.request('PUT', '/products/1', { title: 'iPhone Galaxy +1' }).then(
             (response) => {
                 expect(response.status).to.equal(200)
@@ -108,5 +104,25 @@ describe('example Products test suite', () => {
                 })
             }
         )
+    })
+
+    // This test is using a fake Auth token, since most APIs will require a token when making a request
+    it('add a new product with auth', () => {
+        cy.request({
+            method: 'POST',
+            url: '/products/add',
+            headers: {
+                Authorization: `Bearer ${Cypress.env('FAKE_API_KEY')}`, // You can view this in the Cypress UI when calling the endpoint.
+                accept: 'application/json',
+            },
+            body: { title: 'BMW Pencil' },
+        }).then((response) => {
+            expect(response.status).to.equal(200)
+            expect(response.duration).to.not.be.greaterThan(500)
+            cy.wrap(response.body).should('deep.include', {
+                id: 101, 
+                title: 'BMW Pencil',
+            })
+        })
     })
 })
